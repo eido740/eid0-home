@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>EID0</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EID0 // SOURCE</title>
     <style>
-        body { background: #000; color: #00ff00; font-family: monospace; padding: 10%; text-align: center; }
-        h1 { border: 1px solid #00ff00; padding: 20px; display: inline-block; }
+        :root { --neon: #39ff14; --bg: #050505; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { text-align: center; position: relative; }
+        .glitch { font-size: 3rem; font-weight: bold; text-transform: uppercase; letter-spacing: 10px; text-shadow: 0 0 15px var(--neon); animation: pulse 2s infinite; }
+        .status { margin-top: 20px; font-size: 0.9rem; opacity: 0.7; }
+        .btn { margin-top: 40px; padding: 10px 25px; border: 1px solid var(--neon); background: transparent; color: var(--neon); text-decoration: none; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; cursor: pointer; display: inline-block; }
+        .btn:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
     </style>
 </head>
 <body>
-    <h1>HELLO WORLD</h1>
-    <p>> SYSTEM_STATUS: ONLINE</p>
-    <p>> DOMAIN: EID0.COM</p>
+    <div class="container">
+        <div class="glitch">EID0</div>
+        <div class="status">> SYSTEM_STABLE // DATA_FLOW_ACTIVE</div>
+        <div class="status">> PERMISSIONS_VERIFIED // AI_WRITE_ENABLED</div>
+        <a href="/mattGPT" class="btn">Enter Subnet</a>
+    </div>
 </body>
 </html>
