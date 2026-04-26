@@ -1,0 +1,24 @@
+name: AI PR Generator
+on:
+  issues:
+    types: [labeled] # Triggers when you add a specific label
+
+jobs:
+  generate-code:
+    if: github.event.label.name == 'ai-execute'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate PR with Gemini
+        uses: WillBooster/gen-pr@v4
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          github_token: ${{ secrets.API_ENGINEER_TOKEN }}
+          model: 'gemini-2.0-flash' # Or your preferred model
