@@ -1,8 +1,9 @@
 name: AI PR Generator
 on:
+  repository_dispatch:
+    types: [ai_chat_request]
   issues:
-    types: [labeled] # Triggers when you add a specific label
-
+    types: [labeled]
 jobs:
   generate-code:
     if: github.event.label.name == 'ai-execute'
