@@ -1,20 +1,20 @@
 const STORAGE_KEY = "eid0.cards.goldfish";
 
-const sampleDeck = `4 Lantern Scout
-4 Ash-Key Courier
-4 Quiet Foundry
-3 Threadneedle Charm
-3 Copper Veil
-4 Map the Ruins
-4 Orchard Familiar
-2 Ember Ledger
-3 Weathered Gate
-4 Signal Kite
-3 Soft Reset
-2 Glasswork Engine
-4 Lowland Market
-4 Verdant Switchback
-4 Archive Path`;
+const sampleDeck = `4 Lantern Scout | When played, scout the top card of your library.
+4 Ash-Key Courier | Carries one ember token between zones.
+4 Quiet Foundry | Exhaust: make a scrap token.
+3 Threadneedle Charm | Ready a card that entered play this turn.
+3 Copper Veil | Prevent the next point of damage this turn.
+4 Map the Ruins | Draw a card, then discard a card.
+4 Orchard Familiar | Gains +1 while you have three cards in play.
+2 Ember Ledger | Whenever you draw your second card, score one spark.
+3 Weathered Gate | Cards behind the gate cannot be targeted.
+4 Signal Kite | Look at the next two cards of your library.
+3 Soft Reset | Return a played card to its owner's hand.
+2 Glasswork Engine | Build only if you have two artifacts in play.
+4 Lowland Market | Trade a card in hand for the top card of your library.
+4 Verdant Switchback | Move a card from discard to the bottom of your library.
+4 Archive Path | The next card you play costs one less action.`;
 
 const state = {
   mirror: true,
@@ -64,10 +64,13 @@ function parseDeckList(text) {
 
 function expandDeckLine(line) {
   const cleaned = line.replace(/\s+/g, " ");
-  const leading = cleaned.match(/^(\d+)\s*x?\s+(.+)$/i);
-  const trailing = cleaned.match(/^(.+?)\s+x\s*(\d+)$/i);
+  const [cardPart, ...textParts] = cleaned.split("|");
+  const cardText = textParts.join("|").trim();
+  const cardDefinition = cardPart.trim();
+  const leading = cardDefinition.match(/^(\d+)\s*x?\s+(.+)$/i);
+  const trailing = cardDefinition.match(/^(.+?)\s+x\s*(\d+)$/i);
   let count = 1;
-  let name = cleaned;
+  let name = cardDefinition;
 
   if (leading) {
     count = Number(leading[1]);
@@ -80,7 +83,8 @@ function expandDeckLine(line) {
   count = Number.isFinite(count) ? Math.max(1, Math.min(count, 99)) : 1;
   return Array.from({ length: count }, (_, index) => ({
     id: `${name}-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}-${index}`,
-    name
+    name,
+    text: cardText
   }));
 }
 
@@ -123,19 +127,27 @@ function clampHandSize() {
 
 function drawCards(playerIndex, count = 1, shouldRender = true) {
   const player = state.players[playerIndex];
+  let drawn = 0;
   for (let index = 0; index < count; index += 1) {
     const next = player.library.shift();
     if (!next) break;
     player.hand.push(next);
+    drawn += 1;
   }
-  setStatus(`${player.name} drew ${count === 1 ? "a card" : `${count} cards`}`);
+  if (drawn > 0) {
+    setStatus(`${player.name} drew ${drawn === 1 ? "a card" : `${drawn} cards`}`);
+  } else {
+    setStatus(`${player.name} has no cards to draw`);
+  }
   if (shouldRender) render();
+  return drawn;
 }
 
 function drawBoth() {
-  drawCards(0, 1, false);
-  drawCards(1, 1, false);
-  setStatus("both players drew a card");
+  const playerOneDrawn = drawCards(0, 1, false);
+  const playerTwoDrawn = drawCards(1, 1, false);
+  const totalDrawn = playerOneDrawn + playerTwoDrawn;
+  setStatus(totalDrawn ? `drew ${totalDrawn} total card${totalDrawn === 1 ? "" : "s"}` : "no cards to draw");
   render();
 }
 
@@ -174,11 +186,14 @@ function removeById(cards, cardId) {
 }
 
 function resetTable() {
-  state.players = [
-    createPlayerState("player one"),
-    createPlayerState("player two")
-  ];
-  setStatus("table reset");
+  const decks = getDecks();
+  state.players = decks.map((deck, playerIndex) => {
+    const player = createPlayerState(playerIndex === 0 ? "player one" : "player two");
+    player.library = shuffle(deck);
+    return player;
+  });
+  const totalCards = state.players.reduce((total, player) => total + player.library.length, 0);
+  setStatus(totalCards ? "table reset with fresh libraries" : "table reset; add deck lists to draw");
   render();
 }
 
@@ -237,11 +252,15 @@ function renderZone(selector, cards, playerIndex, zone) {
     name.className = "card-name";
     name.textContent = card.name;
 
+    const text = document.createElement("span");
+    text.className = "card-text";
+    text.textContent = card.text || "No rules text yet.";
+
     const meta = document.createElement("span");
     meta.className = "card-meta";
     meta.textContent = zone === "hand" ? "hand" : "play";
 
-    button.append(name, meta);
+    button.append(name, text, meta);
     container.append(button);
   });
 }
