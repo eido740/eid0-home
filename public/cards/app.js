@@ -41,7 +41,8 @@ const els = {
   deckSummary: document.querySelector("#deckSummary"),
   deckACount: document.querySelector("#deckACount"),
   deckBCount: document.querySelector("#deckBCount"),
-  statusLine: document.querySelector("#statusLine")
+  statusLine: document.querySelector("#statusLine"),
+  cardTooltip: document.querySelector("#cardTooltip")
 };
 
 function createPlayerState(name) {
@@ -246,6 +247,9 @@ function renderZone(selector, cards, playerIndex, zone) {
     button.dataset.player = String(playerIndex);
     button.dataset.zone = zone;
     button.dataset.cardId = card.id;
+    button.dataset.cardName = card.name;
+    button.dataset.cardText = card.text || "No rules text yet.";
+    button.setAttribute("aria-describedby", "cardTooltip");
     button.setAttribute("aria-label", `${zone === "hand" ? "Play" : "Discard"} ${card.name}`);
 
     const name = document.createElement("span");
@@ -271,6 +275,54 @@ function setStatus(message) {
   requestAnimationFrame(() => {
     els.statusLine.classList.add("toast");
   });
+}
+
+function showCardTooltip(cardButton, event) {
+  const title = document.createElement("strong");
+  const text = document.createElement("span");
+
+  title.textContent = cardButton.dataset.cardName || "card";
+  text.textContent = cardButton.dataset.cardText || "No rules text yet.";
+  els.cardTooltip.textContent = "";
+  els.cardTooltip.append(title, text);
+  els.cardTooltip.hidden = false;
+  els.cardTooltip.classList.add("is-visible");
+  positionCardTooltip(event || cardButton);
+}
+
+function hideCardTooltip() {
+  els.cardTooltip.classList.remove("is-visible");
+  els.cardTooltip.hidden = true;
+}
+
+function positionCardTooltip(anchor) {
+  if (els.cardTooltip.hidden) return;
+
+  const offset = 16;
+  const edge = 14;
+  const point = anchor.clientX === undefined ? getElementPoint(anchor) : anchor;
+  const tooltipRect = els.cardTooltip.getBoundingClientRect();
+  let left = point.clientX + offset;
+  let top = point.clientY + offset;
+
+  if (left + tooltipRect.width > window.innerWidth - edge) {
+    left = point.clientX - tooltipRect.width - offset;
+  }
+
+  if (top + tooltipRect.height > window.innerHeight - edge) {
+    top = point.clientY - tooltipRect.height - offset;
+  }
+
+  els.cardTooltip.style.left = `${Math.max(edge, left)}px`;
+  els.cardTooltip.style.top = `${Math.max(edge, top)}px`;
+}
+
+function getElementPoint(element) {
+  const rect = element.getBoundingClientRect();
+  return {
+    clientX: rect.left + rect.width / 2,
+    clientY: rect.top + rect.height / 2
+  };
 }
 
 function saveLists() {
@@ -337,6 +389,7 @@ function bindEvents() {
     if (!target) return;
 
     if (target.classList.contains("card-btn")) {
+      hideCardTooltip();
       const playerIndex = Number(target.dataset.player);
       if (target.dataset.zone === "hand") playCard(playerIndex, target.dataset.cardId);
       if (target.dataset.zone === "play") discardPlayed(playerIndex, target.dataset.cardId);
@@ -346,6 +399,35 @@ function bindEvents() {
     const playerIndex = Number(target.dataset.player);
     if (target.dataset.action === "draw") drawCards(playerIndex);
     if (target.dataset.action === "restore") restoreDiscard(playerIndex);
+  });
+
+  document.addEventListener("pointerover", (event) => {
+    const card = event.target.closest(".card-btn");
+    if (card) showCardTooltip(card, event);
+  });
+
+  document.addEventListener("pointermove", (event) => {
+    positionCardTooltip(event);
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    const card = event.target.closest(".card-btn");
+    if (!card) return;
+
+    const nextCard = event.relatedTarget && event.relatedTarget.closest
+      ? event.relatedTarget.closest(".card-btn")
+      : null;
+
+    if (nextCard !== card) hideCardTooltip();
+  });
+
+  document.addEventListener("focusin", (event) => {
+    const card = event.target.closest(".card-btn");
+    if (card) showCardTooltip(card);
+  });
+
+  document.addEventListener("focusout", (event) => {
+    if (event.target.closest(".card-btn")) hideCardTooltip();
   });
 }
 
