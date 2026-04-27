@@ -458,6 +458,48 @@ textarea:focus {
   transform: rotate(-1deg);
 }
 
+.card-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  width: min(360px, calc(100vw - 28px));
+  max-height: min(420px, 54vh);
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  overflow: auto;
+  border: 1px solid rgba(39, 36, 27, 0.2);
+  border-radius: 8px;
+  color: var(--card-ink);
+  background: #fff6e8;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.42);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.card-tooltip[hidden] {
+  display: none;
+}
+
+.card-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-tooltip strong {
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.card-tooltip span {
+  color: rgba(37, 34, 25, 0.78);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .toast {
   animation: toast 1.2s ease both;
 }
