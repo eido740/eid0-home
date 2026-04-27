@@ -391,13 +391,14 @@ textarea:focus {
 
 .card-btn {
   position: relative;
-  flex: 0 0 84px;
-  width: 84px;
-  min-height: 112px;
+  flex: 0 0 112px;
+  width: 112px;
+  min-height: 144px;
   padding: 10px 9px;
   display: grid;
+  grid-template-rows: auto auto 1fr auto;
   align-content: start;
-  gap: 8px;
+  gap: 7px;
   border-radius: 8px;
   color: var(--card-ink);
   background:
@@ -425,12 +426,22 @@ textarea:focus {
 
 .card-name {
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 0.78rem;
   font-weight: 740;
   line-height: 1.15;
+}
+
+.card-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: rgba(37, 34, 25, 0.76);
+  font-size: 0.66rem;
+  line-height: 1.18;
 }
 
 .card-meta {
@@ -441,9 +452,9 @@ textarea:focus {
 }
 
 .card-btn.in-play {
-  flex-basis: 78px;
-  width: 78px;
-  min-height: 104px;
+  flex-basis: 102px;
+  width: 102px;
+  min-height: 132px;
   transform: rotate(-1deg);
 }
 
@@ -528,8 +539,8 @@ textarea:focus {
   }
 
   .card-btn {
-    flex-basis: 76px;
-    width: 76px;
+    flex-basis: 104px;
+    width: 104px;
   }
 }
 
