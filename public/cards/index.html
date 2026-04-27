@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cards // goldfish</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>cards</h1>
+          <p>goldfish lab</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <label class="hand-control" for="handSize">
+          hand
+          <input id="handSize" type="number" min="1" max="12" value="7">
+        </label>
+        <button id="dealBothBtn" class="primary-btn" type="button">deal both</button>
+        <button id="resetBtn" class="quiet-btn" type="button">reset</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="deck-studio" aria-label="Deck list editor">
+        <section class="deck-controls">
+          <div>
+            <h2>deck lists</h2>
+            <p id="deckSummary">0 cards ready</p>
+          </div>
+          <label class="mirror-toggle">
+            <input id="mirrorDecks" type="checkbox" checked>
+            <span>mirror</span>
+          </label>
+        </section>
+
+        <section class="editor-pair">
+          <article class="deck-editor">
+            <div class="editor-head">
+              <label for="deckAInput">player one</label>
+              <span id="deckACount">0 cards</span>
+            </div>
+            <textarea id="deckAInput" spellcheck="false"></textarea>
+          </article>
+
+          <article class="deck-editor" id="deckBEditor">
+            <div class="editor-head">
+              <label for="deckBInput">player two</label>
+              <span id="deckBCount">0 cards</span>
+            </div>
+            <textarea id="deckBInput" spellcheck="false"></textarea>
+          </article>
+        </section>
+
+        <section class="deck-actions" aria-label="Deck actions">
+          <button id="sampleBtn" type="button">sample</button>
+          <button id="copyBtn" type="button">copy one to two</button>
+          <button id="saveBtn" type="button">save</button>
+          <button id="loadBtn" type="button">load</button>
+        </section>
+      </aside>
+
+      <section class="tabletop" aria-label="Goldfish table">
+        <div class="table-status">
+          <div>
+            <span class="table-kicker">session</span>
+            <strong id="statusLine">paste a list, then deal</strong>
+          </div>
+          <div class="turn-tools" aria-label="Shared table tools">
+            <button id="drawBothBtn" type="button">draw both</button>
+            <button id="shuffleBtn" type="button">shuffle</button>
+          </div>
+        </div>
+
+        <div class="players">
+          <section class="player-board" data-player="0">
+            <div class="player-head">
+              <div>
+                <span class="player-label">player one</span>
+                <strong id="p0LibraryCount">0 library</strong>
+              </div>
+              <button class="draw-btn" data-action="draw" data-player="0" type="button">draw</button>
+            </div>
+
+            <div class="zones">
+              <button class="library pile" data-action="draw" data-player="0" type="button">
+                <span>library</span>
+                <strong id="p0DeckCount">0</strong>
+              </button>
+              <button class="discard pile" data-action="restore" data-player="0" type="button">
+                <span>discard</span>
+                <strong id="p0DiscardCount">0</strong>
+              </button>
+            </div>
+
+            <div class="play-area" id="p0Play" aria-label="Player one play area"></div>
+            <div class="hand-row" id="p0Hand" aria-label="Player one hand"></div>
+          </section>
+
+          <section class="player-board" data-player="1">
+            <div class="player-head">
+              <div>
+                <span class="player-label">player two</span>
+                <strong id="p1LibraryCount">0 library</strong>
+              </div>
+              <button class="draw-btn" data-action="draw" data-player="1" type="button">draw</button>
+            </div>
+
+            <div class="zones">
+              <button class="library pile" data-action="draw" data-player="1" type="button">
+                <span>library</span>
+                <strong id="p1DeckCount">0</strong>
+              </button>
+              <button class="discard pile" data-action="restore" data-player="1" type="button">
+                <span>discard</span>
+                <strong id="p1DiscardCount">0</strong>
+              </button>
+            </div>
+
+            <div class="play-area" id="p1Play" aria-label="Player two play area"></div>
+            <div class="hand-row" id="p1Hand" aria-label="Player two hand"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
