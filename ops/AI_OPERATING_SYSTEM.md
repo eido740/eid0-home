@@ -10,6 +10,7 @@
 - You describe intent in plain English; the assistant executes the mechanics.
 - Preferred style: "create project <name>", "park project <name>", "resume project <name>".
 - User should not need to run utility scripts manually unless they explicitly want to.
+- If a task requires an external permission boundary (for example, GitHub repo creation), assistant provides a one-time setup path, then automates all repeated steps.
 
 ## Core Architecture
 - Cursor (desktop) = Engineer (implementation + verification).
@@ -40,6 +41,7 @@
 
 ## Natural-Language Commands (No Script Invocation Required)
 - "Create project <name>" -> assistant scaffolds project files and updates portfolio index.
+- "Create repo <name>" -> assistant creates a repo-factory request so GitHub Actions can create the repository after merge.
 - "Pause project <name>" -> assistant updates status/location and next re-entry step.
 - "Resume project <name>" -> assistant restores context from project docs and MEMEX.
 - "Ship status" -> assistant summarizes blockers, active projects, and next physical steps.

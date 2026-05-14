@@ -6,6 +6,8 @@
 ## 2) Start projects via plain English
 - Tell assistant: `Create project <project name>`.
 - Assistant handles scaffold + portfolio updates.
+- If project needs a new GitHub repo, tell assistant: `Create repo <repo-name>`.
+- Complete one-time repo factory setup in `ops/REPO_FACTORY_SETUP.md`.
 - Manual fallback (optional):
   ```bash
   ./scripts/new_project.sh "project name"

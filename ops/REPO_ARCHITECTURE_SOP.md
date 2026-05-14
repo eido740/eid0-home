@@ -40,7 +40,13 @@ Use a monorepo only when codebases are tightly coupled and versioned together (s
 
 ## Project Creation SOP
 1. Define mission and done criteria.
-2. Create execution repo.
+2. Create execution repo (directly or through repo-factory automation).
 3. Register it in `PROJECT_INDEX.md`.
 4. Scaffold docs from templates.
 5. Start implementation with explicit `PLAN.md`.
+
+## Repo Factory (White-Glove Mode)
+- Workflow: `.github/workflows/repo-factory.yml`
+- Requests: `.github/repo-factory/requests/*.json`
+- Processed ledger: `.github/repo-factory/processed/*.processed.json`
+- One-time setup: `ops/REPO_FACTORY_SETUP.md`
