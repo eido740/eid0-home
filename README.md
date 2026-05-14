@@ -9,6 +9,7 @@ This repo now includes a durable workflow layer for organized, repeatable projec
 - `ops/REPO_ARCHITECTURE_SOP.md` - repo strategy (control tower + per-project execution repos).
 - `ops/REPO_FACTORY_SETUP.md` - one-time setup for automated GitHub repo creation.
 - `ops/REPO_SEEDER_SETUP.md` - setup for automated bootstrap seeding into execution repos.
+- `ops/AUTO_MERGE_LANE.md` - guarded one-label lane for low-risk auto-merging.
 - `MEMEX.md` - mandatory session continuity log (decisions, blockers, next physical step).
 - `PROJECT_INDEX.md` - portfolio tracker for project status + repo location.
 - `ops/GEMINI_TO_CURSOR_HANDOFF.md` - mobile strategy to desktop execution handoff template.
@@ -51,3 +52,7 @@ Generated project files:
 ### Repo seeder automation
 - Setup: `ops/REPO_SEEDER_SETUP.md`
 - Request template: `.github/repo-seeder/REQUEST_TEMPLATE.json`
+
+### Auto-merge lane
+- Workflow: `.github/workflows/auto-merge-lane.yml`
+- Trigger label: `automerge-safe`
