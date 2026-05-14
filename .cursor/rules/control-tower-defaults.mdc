@@ -1,0 +1,39 @@
+---
+description: Default collaboration, safety, and scope norms for the eid0-home control tower repo.
+alwaysApply: true
+---
+
+# Control tower — Cursor project rules
+
+This workspace is the **control tower** (`eid0-home`). For architecture, roles, MEMEX, and session protocol, follow **`ops/AI_OPERATING_SYSTEM.md`**. These rules add Cursor-specific execution norms; if anything conflicts, the operating system doc wins.
+
+## Ambiguity and decisions
+
+- When requirements are **ambiguous** or multiple reasonable approaches exist (API shape, repo-wide convention, product behavior, risky tradeoff), ask **brief clarifying questions** before implementing or before **git commit** that would encode an uncertain choice.
+- Do **not** invent major decisions on the user’s behalf; narrow mechanical fixes with one obvious correct answer do not require a full Q&A round.
+- If required context is missing and work cannot continue safely, say so plainly (the operating system uses a “context gap” style stop—combine that with **what** you need or **which** fork you would choose if forced).
+
+## Change discipline
+
+- Prefer the **smallest change** that satisfies the request; avoid drive-by refactors unless explicitly asked for a cleanup pass.
+- Match **existing patterns** in the nearest sibling files (naming, errors, logging, structure) before introducing a new pattern.
+- Preserve **public contracts** (exported APIs, workflow filenames this repo’s automation depends on) unless the task explicitly allows breaking changes.
+
+## Safety and secrets
+
+- Never commit or paste real **secrets** (API keys, tokens, production credentials). Use placeholders and environment variable names; keep deploy secrets in designated execution repos per the deployment boundary in `README.md`.
+- Before **destructive** operations (`rm`/`git reset --hard`/schema drops/mass renames), summarize impact and get **explicit confirmation** unless the user already asked for that exact operation.
+
+## Dependencies and verification
+
+- Do **not** add new dependencies unless the task implies it; if a new package is the right move, say **why** and which package before adding.
+- After substantive code changes, run the repo’s **standard checks** when available (lint/tests/scripts documented here) and fix failures introduced by the change.
+
+## Communication
+
+- Default to **concise** answers; expand for real ambiguity, cross-cutting design, or when the user asks for depth.
+- State **uncertainty** explicitly when guessing (version-specific behavior, undocumented APIs).
+
+## Cost and model lane
+
+- Respect **`ops/COST_GUARDRAILS.md`**: default to the cheap lane unless the user escalates for a justified hard task.
