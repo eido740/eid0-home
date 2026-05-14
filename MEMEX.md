@@ -1,10 +1,10 @@
 # MEMEX
 
 ## Session Snapshot
-- Session #: 8
+- Session #: 9
 - Date: 2026-05-14
 - Active repo/branch: `/workspace` / `cursor/universal-ai-workflow-0ca7`
-- Strategic objective: Seed `eid0-site` from bootstrap without manual repo access from agent account.
+- Strategic objective: Resolve repo-seeder workflow failure and reduce PR click friction.
 
 ## Decisions Made
 - Cursor is the implementation engine; Gemini Live is strategy support.
@@ -27,12 +27,16 @@
 - Verified `Repo Factory` run succeeded and created `https://github.com/eido740/eid0-site`.
 - Added `Repo Seeder` workflow to apply approved bootstrap profiles to execution repos via request files.
 - Queued seeding request: `.github/repo-seeder/requests/2026-05-14-eid0-site-bootstrap.json`.
+- Observed repo-seeder runs failing immediately due workflow file parsing issue.
+- Root cause: multi-line HTML template in YAML block scalar broke indentation parsing.
+- Fixed seeder by replacing raw multiline template literals with explicit line-array joins.
+- Set policy to create PRs ready-for-review by default (non-draft) to remove extra status-toggle click.
 
 ## Current Technical Blockers
-- Seeder request is queued on feature branch; merge is required for execution on `main`.
+- Seeder fix is on feature branch and must be merged to rerun successfully.
 
 ## Next Physical Step
-- Merge seeder PR so `Repo Seeder` runs and applies bootstrap files into `eid0-site`.
+- Merge hotfix PR for repo-seeder and confirm successful seeding of `eid0-site`.
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).
@@ -41,6 +45,7 @@
 - Decide whether to run repo-factory under your user token or a dedicated machine user.
 - Decide whether `eid0-site` should stay private or be switched to public after creation.
 - Confirm seeded files in `eid0-site` and run first manual deploy test.
+- Decide whether to auto-merge low-risk automation PRs once checks pass.
 
 ## Session Log
 | Session # | Date | Focus | Friction Observed | Rule Update Proposed |
@@ -53,6 +58,7 @@
 | 6 | 2026-05-14 | First automated repo request execution | Repo creation is event-driven on `main`, so feature-branch request needs merge to run | Queue request file and make merge dependency explicit |
 | 7 | 2026-05-14 | Repo-factory hotfix | Workflow failed due to `core` redeclaration in github-script runtime | Remove local `core` import and rely on injected context object |
 | 8 | 2026-05-14 | Repo seeding automation for private repo access boundary | Agent account lacks direct access to private execution repos for direct push | Add token-backed Repo Seeder workflow and queue profile-based seed request |
+| 9 | 2026-05-14 | Seeder workflow hotfix + PR friction reduction | Workflow parse failure and repeated draft->ready clicks slowed execution | Rewrite seeder string construction for YAML safety and default PRs to non-draft |
 
 ## Retro (Session 5)
 - Recurring friction point 1: Manual commands and cleanup create context decay.
