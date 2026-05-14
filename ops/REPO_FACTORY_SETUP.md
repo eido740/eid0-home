@@ -16,6 +16,10 @@ This turns project repo creation into an automated pipeline.
 4. Optional: set repository variable:
    - `REPO_FACTORY_OWNER` = target owner/org (example: `eido740`)
 
+If you will also use repo seeder to write `.github/workflows/*` files in execution repos, ensure token includes workflow-write permission:
+- classic PAT: add `workflow` scope
+- fine-grained PAT: grant `Workflows: Read and write`
+
 ## Safety rails in workflow
 - Only names with approved prefixes are allowed (`akn-`, `eid0-`, `lab-`).
 - Repo names must be lowercase and normalized.

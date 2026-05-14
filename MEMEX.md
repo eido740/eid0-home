@@ -1,10 +1,10 @@
 # MEMEX
 
 ## Session Snapshot
-- Session #: 10
+- Session #: 11
 - Date: 2026-05-14
 - Active repo/branch: `/workspace` / `cursor/universal-ai-workflow-0ca7`
-- Strategic objective: Add guarded auto-merge lane to cut PR click overhead.
+- Strategic objective: Resolve opaque repo-seeder 404 and make failure mode actionable.
 
 ## Decisions Made
 - Cursor is the implementation engine; Gemini Live is strategy support.
@@ -34,12 +34,16 @@
 - Added guarded auto-merge workflow (`auto-merge-lane.yml`) driven by `automerge-safe` label.
 - Added explicit guardrails for file scope, trusted authors, same-repo branches, and `main` target.
 - Documented lane usage and constraints in `ops/AUTO_MERGE_LANE.md`.
+- Observed `Repo Seeder` fail with `HttpError: Not Found` on PUT to `repos/eido740/eid0-site/contents/.github/workflows/deploy.yml`.
+- Patched seeder to emit explicit guidance for workflow-permission failures (classic PAT `workflow` scope or fine-grained Workflows write permission).
+- Added branch resolution guard: fallback to target repo default branch if requested branch is missing.
+- Updated seeder docs and request templates to treat `branch` as optional and clarify required token permissions.
 
 ## Current Technical Blockers
-- Auto-merge lane policy must be merged to `main` before it can auto-merge future PRs.
+- Seeder hotfix must be merged to `main`; token may still need workflow-write permission depending on current PAT scope.
 
 ## Next Physical Step
-- Merge current PR so auto-merge lane becomes active; then apply `automerge-safe` label on eligible PRs.
+- Merge seeder hotfix PR, then rerun `Repo Seeder` for queued request and validate `eid0-site` bootstrap files.
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).
@@ -50,6 +54,7 @@
 - Confirm seeded files in `eid0-site` and run first manual deploy test.
 - Decide whether to auto-merge low-risk automation PRs once checks pass.
 - Decide whether to broaden or tighten allowed path rules in auto-merge lane after first week of use.
+- If seeder still fails, rotate token with workflow-write permission and rerun.
 
 ## Session Log
 | Session # | Date | Focus | Friction Observed | Rule Update Proposed |
@@ -64,6 +69,7 @@
 | 8 | 2026-05-14 | Repo seeding automation for private repo access boundary | Agent account lacks direct access to private execution repos for direct push | Add token-backed Repo Seeder workflow and queue profile-based seed request |
 | 9 | 2026-05-14 | Seeder workflow hotfix + PR friction reduction | Workflow parse failure and repeated draft->ready clicks slowed execution | Rewrite seeder string construction for YAML safety and default PRs to non-draft |
 | 10 | 2026-05-14 | Guarded auto-merge lane | Repeated manual merge clicks created operator friction | Add label-based auto-merge workflow with strict path and trust guardrails |
+| 11 | 2026-05-14 | Seeder 404 diagnostics + remediation | Opaque 404 blocked bootstrap with unclear root cause | Add explicit permission error messaging, branch fallback, and clearer token-scope docs |
 
 ## Retro (Session 10)
 - Recurring friction point 1: Merge workflow still too manual.
