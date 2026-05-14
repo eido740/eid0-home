@@ -6,13 +6,16 @@ This repo now includes a durable workflow layer for organized, repeatable projec
 
 ### Core files
 - `ops/AI_OPERATING_SYSTEM.md` - rules of engagement, role split, and guardrails.
+- `ops/REPO_ARCHITECTURE_SOP.md` - repo strategy (control tower + per-project execution repos).
 - `MEMEX.md` - mandatory session continuity log (decisions, blockers, next physical step).
+- `PROJECT_INDEX.md` - portfolio tracker for project status + repo location.
 - `ops/GEMINI_TO_CURSOR_HANDOFF.md` - mobile strategy to desktop execution handoff template.
 - `ops/WORKFLOW_QUICKSTART.md` - minimal startup flow.
 
 ### Project scaffolding
 - Templates live in `templates/project/`.
-- Create a new project folder with:
+- Preferred: tell assistant `Create project <name>` and let it run automation.
+- Manual fallback:
 
 ```bash
 ./scripts/new_project.sh "project name"

@@ -3,10 +3,13 @@
 ## 1) Capture raw ideas
 - Drop rough notes into `inbox/` first.
 
-## 2) Create a structured project
-```bash
-./scripts/new_project.sh "project name"
-```
+## 2) Start projects via plain English
+- Tell assistant: `Create project <project name>`.
+- Assistant handles scaffold + portfolio updates.
+- Manual fallback (optional):
+  ```bash
+  ./scripts/new_project.sh "project name"
+  ```
 
 ## 3) Execute with discipline
 - Keep implementation logs in project `LOG.md`.

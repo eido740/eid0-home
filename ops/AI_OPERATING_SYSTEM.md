@@ -6,16 +6,42 @@
 - Communication standard: candor over corporate speak.
 - If a solution is weak, call it out directly and explain why.
 
+## Zero-Command Default (Autopilot)
+- You describe intent in plain English; the assistant executes the mechanics.
+- Preferred style: "create project <name>", "park project <name>", "resume project <name>".
+- User should not need to run utility scripts manually unless they explicitly want to.
+
 ## Core Architecture
 - Cursor (desktop) = Engineer (implementation + verification).
 - Gemini Live (mobile) = Strategic Consultant (framing, priorities, tradeoffs).
 - Primary bridge artifact = MEMEX.md.
+
+## GitHub / Repo Architecture SOP
+- This repository is the **Control Tower** (brains + workflow layer):
+  - MEMEX continuity,
+  - templates and automation,
+  - project portfolio index,
+  - shared standards.
+- Each serious build gets its **own repository** (execution repo):
+  - isolated issues/PRs,
+  - isolated CI/CD,
+  - isolated risk.
+- Default policy: do **not** pile unrelated production work into one giant repo.
+- Exception: use a monorepo only when components are tightly coupled and released together.
 
 ## Mandatory Agentic Rules
 1. Plan-before-code: for tasks expected to exceed ~50 lines of implementation, present a concise checklist and wait for explicit approval ("Proceed" or thumbs up).
 2. Terminal-first: verify local system state autonomously (`pwd`, `ls`, repo checks) before significant work.
 3. Anti-hallucination: search codebase/docs before assumptions. If required context is missing, declare `Context Gap` and stop.
 4. Lazy mode: propose an automation workflow once; if rejected, do not re-pitch repeatedly.
+5. Session-close autopilot: assistant updates `MEMEX.md` at the end of each substantive work session.
+6. Hanging-session recovery: on next interaction after a dangling session, assistant first reconciles and closes the prior session in `MEMEX.md`, then starts new work.
+
+## Natural-Language Commands (No Script Invocation Required)
+- "Create project <name>" -> assistant scaffolds project files and updates portfolio index.
+- "Pause project <name>" -> assistant updates status/location and next re-entry step.
+- "Resume project <name>" -> assistant restores context from project docs and MEMEX.
+- "Ship status" -> assistant summarizes blockers, active projects, and next physical steps.
 
 ## Session Protocol
 ### Start of session
@@ -28,6 +54,7 @@
   - decisions made,
   - current technical blockers,
   - next physical step.
+- Update project portfolio status if project state changed.
 
 ## Continuous Improvement (Retro Rule)
 - Every 5th session, run a retro against recent interaction history.
