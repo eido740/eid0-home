@@ -1,10 +1,10 @@
 # MEMEX
 
 ## Session Snapshot
-- Session #: 12
+- Session #: 13
 - Date: 2026-05-14
-- Active repo/branch: `/workspace` / `cursor/universal-ai-workflow-0ca7`
-- Strategic objective: Establish permanent model-cost SOP and clarify cheap-mode vs big-brain workflow.
+- Active repo/branch: `/workspace` / `cursor/twistile-starter-and-repo-386b`
+- Strategic objective: Intake **Twistile** (Rubik mosaic image tool for `eid0.com/mosaic`) via project scaffold + repo-factory request.
 
 ## Decisions Made
 - Cursor is the implementation engine; Gemini Live is strategy support.
@@ -40,12 +40,15 @@
 - Updated seeder docs and request templates to treat `branch` as optional and clarify required token permissions.
 - Added permanent cost-routing SOP (`ops/COST_GUARDRAILS.md`) with default cheap lane, escalation triggers, and daily spend guardrails.
 - Clarified model switching behavior: for Cloud Agent style sessions, use a new agent/session to move to cheaper lane when model is locked in current run.
+- Adopted project codename **Twistile** (Rubik’s-cube mosaic planner from images); execution repo name **`eid0-twistile`**; public entrypoint target **`https://eid0.com/mosaic`** (routing/deploy still owned by `eid0-site`).
+- Scaffolded control-tower project docs at `projects/active/twistile/` and registered the row in `PROJECT_INDEX.md`.
+- Queued repo creation via `.github/repo-factory/requests/2026-05-14-eid0-twistile.json` (private repo + topics + homepage metadata).
 
 ## Current Technical Blockers
 - Seeder rerun still depends on token having workflow-write permission in target repo.
 
 ## Next Physical Step
-- Update PAT permissions (`repo` + `workflow` for classic, or fine-grained equivalent), rerun `Repo Seeder`, then validate `eid0-site` files.
+- Merge PR **`cursor/twistile-starter-and-repo-386b` → `main`**, confirm **Repo Factory** creates `eid0-twistile`, then clone it and continue in a **new session** rooted in that repo (see `projects/active/twistile/NEXT.md`).
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).
@@ -58,6 +61,7 @@
 - Decide whether to broaden or tighten allowed path rules in auto-merge lane after first week of use.
 - If seeder still fails, rotate token with workflow-write permission and rerun.
 - Choose concrete daily spend ceiling and hard stop threshold in Cursor dashboard settings.
+- After merge: confirm **Repo Factory** processed `2026-05-14-eid0-twistile.json`, then replace “pending factory” in `PROJECT_INDEX.md` with the live repo URL if wording still says pending.
 
 ## Session Log
 | Session # | Date | Focus | Friction Observed | Rule Update Proposed |
@@ -74,6 +78,7 @@
 | 10 | 2026-05-14 | Guarded auto-merge lane | Repeated manual merge clicks created operator friction | Add label-based auto-merge workflow with strict path and trust guardrails |
 | 11 | 2026-05-14 | Seeder 404 diagnostics + remediation | Opaque 404 blocked bootstrap with unclear root cause | Add explicit permission error messaging, branch fallback, and clearer token-scope docs |
 | 12 | 2026-05-14 | Cost guardrails + model routing SOP | Early-day usage burn risk and uncertainty about model switching path | Add permanent cheap/default lane SOP with explicit big-brain escalation and dashboard guardrails |
+| 13 | 2026-05-14 | Twistile intake + repo-factory queue | None yet | N/A |
 
 ## Retro (Session 10)
 - Recurring friction point 1: Merge workflow still too manual.
