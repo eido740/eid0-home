@@ -1,28 +1,13 @@
-name: Deploy to eid0.com
+name: Control Tower Deploy Guard (Disabled)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'public/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
-  deploy:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: SFTP Deploy
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.FTP_USERNAME }}
-          server: ${{ secrets.FTP_SERVER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          local_path: './public/*'
-          remote_path: '/home/geminuser/eid0.com/'
-          args: '-o StrictHostKeyChecking=no'
+      - name: Explain why this workflow is disabled
+        run: |
+          echo "Deploy is intentionally disabled in the control-tower repo."
+          echo "Use the dedicated site execution repo (eid0-site) for production publishing."

@@ -9,10 +9,15 @@ One giant repo for everything is usually a mess multiplier.
    - MEMEX continuity
    - project templates and workflow scripts
    - portfolio index
+   - no production deployment secrets
 2. **Execution Repos** (one per serious project)
    - actual product code
    - project-specific CI/CD and environments
    - project issues/PRs and release history
+3. **Site Platform Repo** (`eid0-site`)
+   - owns deployment pipeline for `eid0.com`
+   - hosts root site shell and shared web assets
+   - can publish multiple mini-app folders under `public/apps/`
 
 ## Why this is better
 - Keeps unrelated codebases from contaminating each other.
@@ -22,6 +27,11 @@ One giant repo for everything is usually a mess multiplier.
 
 ## When NOT to split repos
 Use a monorepo only when codebases are tightly coupled and versioned together (shared deploy lifecycle, shared release cadence, shared runtime dependencies).
+
+## Domain Hosting Pattern
+- Domain root and publishing workflow live in `eid0-site`.
+- Mini-app repos ship their build artifacts into `eid0-site/public/apps/<app-slug>/` (or deploy directly to matching folders if you intentionally choose that model).
+- Control tower only governs workflow and portfolio; it never publishes production web content.
 
 ## Naming Convention
 - Repo names: `akn-<project-slug>` (example: `akn-pricing-forecast-api`).

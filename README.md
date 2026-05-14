@@ -11,6 +11,7 @@ This repo now includes a durable workflow layer for organized, repeatable projec
 - `PROJECT_INDEX.md` - portfolio tracker for project status + repo location.
 - `ops/GEMINI_TO_CURSOR_HANDOFF.md` - mobile strategy to desktop execution handoff template.
 - `ops/WORKFLOW_QUICKSTART.md` - minimal startup flow.
+- `ops/site-repo-bootstrap/` - bootstrap pack for dedicated `eid0-site` deployment repo.
 
 ### Project scaffolding
 - Templates live in `templates/project/`.
@@ -34,3 +35,7 @@ Generated project files:
 - `projects/paused/` - parked projects.
 - `projects/completed/` - archived projects.
 - `resources/` - reusable prompts and research.
+
+### Deployment boundary
+- This control-tower repository does **not** publish production site content.
+- Production publishing belongs in a dedicated site execution repo (`eid0-site`).
