@@ -1,0 +1,281 @@
+name: Repo Seeder
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/repo-seeder/requests/*.json"
+      - ".github/workflows/repo-seeder.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-seeder-main
+  cancel-in-progress: false
+
+jobs:
+  seed-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate seeder token
+        env:
+          REPO_FACTORY_TOKEN: ${{ secrets.REPO_FACTORY_TOKEN }}
+        run: |
+          if [ -z "$REPO_FACTORY_TOKEN" ]; then
+            echo "Missing required secret: REPO_FACTORY_TOKEN"
+            exit 1
+          fi
+
+      - name: Process seeding requests
+        uses: actions/github-script@v7
+        env:
+          REPO_FACTORY_OWNER: ${{ vars.REPO_FACTORY_OWNER }}
+        with:
+          github-token: ${{ secrets.REPO_FACTORY_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            const requestsDir = ".github/repo-seeder/requests";
+            const processedDir = ".github/repo-seeder/processed";
+            const allowedProfiles = ["eid0-site-bootstrap-v1"];
+            const allowedPrefixes = ["eid0-", "akn-", "lab-"];
+            const safeNameRegex = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
+
+            function readLocal(filePath) {
+              return fs.readFileSync(filePath, "utf8");
+            }
+
+            function bootstrapIndexHtml(title) {
+              const safeTitle = title || "eid0";
+              return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeTitle}</title>
+  <style>
+    :root { --fg: #d6f5e3; --bg: #0a0f0d; --accent: #53d78b; }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--fg); }
+    main { max-width: 900px; margin: 0 auto; padding: 3rem 1.25rem; }
+    h1 { margin-top: 0; color: var(--accent); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
+    .card { border: 1px solid #1f2f28; border-radius: 8px; padding: 1rem; background: #101815; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${safeTitle} site platform</h1>
+    <p>Deployment pipeline is active from this repository.</p>
+    <div class="cards">
+      <div class="card">
+        <h2>Apps</h2>
+        <p>Host mini apps under <code>/public/apps/&lt;app-slug&gt;/</code>.</p>
+      </div>
+      <div class="card">
+        <h2>Shared Assets</h2>
+        <p>Shared static assets live in <code>/public/assets/</code>.</p>
+      </div>
+      <div class="card">
+        <h2>Deploy</h2>
+        <p>Push to <code>main</code> with <code>public/**</code> changes to publish.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
+`;
+            }
+
+            function bootstrapReadme() {
+              return `# eid0-site
+
+Dedicated website platform repository for publishing \`eid0.com\`.
+
+## Purpose
+- own production deploy workflow for the site
+- host root shell and shared web assets
+- host mini apps under \`public/apps/\`
+
+## Deploy behavior
+- workflow: \`.github/workflows/deploy.yml\`
+- trigger: push to \`main\` when \`public/**\` changes
+- destination: DreamHost path \`/home/geminuser/eid0.com/\`
+
+## Bootstrap source
+This repository was seeded from control-tower bootstrap assets.
+`;
+            }
+
+            function seedFilesForProfile(profile, request) {
+              if (profile !== "eid0-site-bootstrap-v1") {
+                throw new Error(`Unsupported profile "${profile}".`);
+              }
+
+              return [
+                {
+                  path: ".github/workflows/deploy.yml",
+                  content: readLocal("ops/site-repo-bootstrap/deploy.yml"),
+                },
+                {
+                  path: "CUTOVER_CHECKLIST.md",
+                  content: readLocal("ops/site-repo-bootstrap/CUTOVER_CHECKLIST.md"),
+                },
+                {
+                  path: "SECRETS_CHECKLIST.md",
+                  content: readLocal("ops/site-repo-bootstrap/SECRETS_CHECKLIST.md"),
+                },
+                {
+                  path: "README.md",
+                  content: bootstrapReadme(),
+                },
+                {
+                  path: "public/index.html",
+                  content: bootstrapIndexHtml(request.site_title),
+                },
+                {
+                  path: "public/apps/.gitkeep",
+                  content: "",
+                },
+                {
+                  path: "public/assets/.gitkeep",
+                  content: "",
+                },
+              ];
+            }
+
+            async function upsertFile(owner, repo, branch, filePath, content, message) {
+              let sha;
+              try {
+                const existing = await github.rest.repos.getContent({
+                  owner,
+                  repo,
+                  path: filePath,
+                  ref: branch,
+                });
+                if (!Array.isArray(existing.data)) {
+                  sha = existing.data.sha;
+                }
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+
+              await github.rest.repos.createOrUpdateFileContents({
+                owner,
+                repo,
+                path: filePath,
+                message,
+                content: Buffer.from(content, "utf8").toString("base64"),
+                branch,
+                sha,
+              });
+            }
+
+            if (!fs.existsSync(requestsDir)) {
+              core.info("No seeding request directory found. Nothing to do.");
+              return;
+            }
+
+            fs.mkdirSync(processedDir, { recursive: true });
+            const requestFiles = fs.readdirSync(requestsDir).filter((f) => f.endsWith(".json")).sort();
+            if (requestFiles.length === 0) {
+              core.info("No pending seeding requests.");
+              return;
+            }
+
+            const { data: authUser } = await github.rest.users.getAuthenticated();
+            const configuredOwner = (process.env.REPO_FACTORY_OWNER || "").trim();
+            const defaultOwner = configuredOwner || authUser.login;
+            const results = [];
+
+            for (const requestFile of requestFiles) {
+              const fullPath = path.join(requestsDir, requestFile);
+              const raw = fs.readFileSync(fullPath, "utf8");
+              const request = JSON.parse(raw);
+
+              const owner = String(request.owner || defaultOwner).trim();
+              const repo = String(request.repo || request.name || "").trim();
+              const profile = String(request.profile || "").trim();
+              const branch = String(request.branch || "main").trim();
+
+              if (!repo) {
+                throw new Error(`Request ${requestFile} is missing "repo" or "name".`);
+              }
+              if (!safeNameRegex.test(repo)) {
+                throw new Error(`Request ${requestFile} has invalid repo "${repo}".`);
+              }
+              if (!allowedPrefixes.some((prefix) => repo.startsWith(prefix))) {
+                throw new Error(`Request ${requestFile} uses disallowed repo prefix for "${repo}".`);
+              }
+              if (!allowedProfiles.includes(profile)) {
+                throw new Error(`Request ${requestFile} has unsupported profile "${profile}".`);
+              }
+
+              const repoInfo = await github.rest.repos.get({ owner, repo });
+              const targetBranch = branch || repoInfo.data.default_branch;
+              const filesToSeed = seedFilesForProfile(profile, request);
+
+              for (const entry of filesToSeed) {
+                await upsertFile(
+                  owner,
+                  repo,
+                  targetBranch,
+                  entry.path,
+                  entry.content,
+                  `chore(seed): apply ${profile}`,
+                );
+              }
+
+              const processed = {
+                ...request,
+                status: "processed",
+                processed_at: new Date().toISOString(),
+                result: {
+                  owner,
+                  repo,
+                  profile,
+                  branch: targetBranch,
+                  files_seeded: filesToSeed.map((f) => f.path),
+                  url: repoInfo.data.html_url,
+                },
+              };
+
+              const processedName = requestFile.replace(/\.json$/, ".processed.json");
+              fs.writeFileSync(path.join(processedDir, processedName), `${JSON.stringify(processed, null, 2)}\n`);
+              fs.unlinkSync(fullPath);
+              results.push(processed.result);
+            }
+
+            if (results.length > 0) {
+              core.summary
+                .addHeading("Repo Seeder Results")
+                .addTable([
+                  [{ data: "Owner", header: true }, { data: "Repo", header: true }, { data: "Profile", header: true }, { data: "Branch", header: true }],
+                  ...results.map((r) => [r.owner, r.repo, r.profile, r.branch]),
+                ]);
+              await core.summary.write();
+            }
+
+      - name: Commit request ledger updates
+        run: |
+          if git diff --quiet; then
+            echo "No ledger updates to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/repo-seeder/requests .github/repo-seeder/processed
+          git commit -m "chore(repo-seeder): record processed seeding requests"
+          git push

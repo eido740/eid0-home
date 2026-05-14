@@ -1,10 +1,10 @@
 # MEMEX
 
 ## Session Snapshot
-- Session #: 7
+- Session #: 8
 - Date: 2026-05-14
 - Active repo/branch: `/workspace` / `cursor/universal-ai-workflow-0ca7`
-- Strategic objective: Hotfix repo-factory runtime error blocking first automated repo provisioning.
+- Strategic objective: Seed `eid0-site` from bootstrap without manual repo access from agent account.
 
 ## Decisions Made
 - Cursor is the implementation engine; Gemini Live is strategy support.
@@ -24,12 +24,15 @@
 - Identified runtime failure in repo-factory workflow: `Identifier 'core' has already been declared`.
 - Patched workflow to use injected `core` from `actions/github-script` context (no local redeclaration).
 - Expanded repo-factory trigger paths to include workflow-file changes for automatic reruns after hotfix merges.
+- Verified `Repo Factory` run succeeded and created `https://github.com/eido740/eid0-site`.
+- Added `Repo Seeder` workflow to apply approved bootstrap profiles to execution repos via request files.
+- Queued seeding request: `.github/repo-seeder/requests/2026-05-14-eid0-site-bootstrap.json`.
 
 ## Current Technical Blockers
-- Hotfix branch must be merged to `main` before rerunning repo-factory.
+- Seeder request is queued on feature branch; merge is required for execution on `main`.
 
 ## Next Physical Step
-- Merge hotfix PR #4; repo-factory should auto-run and process queued `eid0-site` request.
+- Merge seeder PR so `Repo Seeder` runs and applies bootstrap files into `eid0-site`.
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).
@@ -37,7 +40,7 @@
 - Choose mini-app deployment style for `eid0-site` (artifact copy model vs direct folder deploy per app).
 - Decide whether to run repo-factory under your user token or a dedicated machine user.
 - Decide whether `eid0-site` should stay private or be switched to public after creation.
-- Confirm `eid0-site` repository appears after rerun and then seed it with site bootstrap files.
+- Confirm seeded files in `eid0-site` and run first manual deploy test.
 
 ## Session Log
 | Session # | Date | Focus | Friction Observed | Rule Update Proposed |
@@ -49,6 +52,7 @@
 | 5 | 2026-05-14 | White-glove repo provisioning automation | Manual GitHub repo creation step breaks flow and discourages project branching | Add repo-factory workflow with one-time token setup and request ledger |
 | 6 | 2026-05-14 | First automated repo request execution | Repo creation is event-driven on `main`, so feature-branch request needs merge to run | Queue request file and make merge dependency explicit |
 | 7 | 2026-05-14 | Repo-factory hotfix | Workflow failed due to `core` redeclaration in github-script runtime | Remove local `core` import and rely on injected context object |
+| 8 | 2026-05-14 | Repo seeding automation for private repo access boundary | Agent account lacks direct access to private execution repos for direct push | Add token-backed Repo Seeder workflow and queue profile-based seed request |
 
 ## Retro (Session 5)
 - Recurring friction point 1: Manual commands and cleanup create context decay.
