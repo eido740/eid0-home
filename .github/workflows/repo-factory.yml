@@ -42,7 +42,6 @@ jobs:
           script: |
             const fs = require("fs");
             const path = require("path");
-            const core = require("@actions/core");
 
             const requestsDir = ".github/repo-factory/requests";
             const processedDir = ".github/repo-factory/processed";
