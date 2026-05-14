@@ -1,0 +1,174 @@
+name: Repo Factory
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/repo-factory/requests/*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-factory-main
+  cancel-in-progress: false
+
+jobs:
+  create-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate factory token
+        env:
+          REPO_FACTORY_TOKEN: ${{ secrets.REPO_FACTORY_TOKEN }}
+        run: |
+          if [ -z "$REPO_FACTORY_TOKEN" ]; then
+            echo "Missing required secret: REPO_FACTORY_TOKEN"
+            exit 1
+          fi
+
+      - name: Process pending repo requests
+        uses: actions/github-script@v7
+        env:
+          REPO_FACTORY_OWNER: ${{ vars.REPO_FACTORY_OWNER }}
+        with:
+          github-token: ${{ secrets.REPO_FACTORY_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+            const core = require("@actions/core");
+
+            const requestsDir = ".github/repo-factory/requests";
+            const processedDir = ".github/repo-factory/processed";
+            const allowedPrefixes = ["akn-", "eid0-", "lab-"];
+            const safeNameRegex = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
+
+            if (!fs.existsSync(requestsDir)) {
+              core.info("No request directory found. Nothing to do.");
+              return;
+            }
+
+            fs.mkdirSync(processedDir, { recursive: true });
+            const files = fs.readdirSync(requestsDir).filter((f) => f.endsWith(".json")).sort();
+            if (files.length === 0) {
+              core.info("No pending repo request files.");
+              return;
+            }
+
+            const { data: authUser } = await github.rest.users.getAuthenticated();
+            const configuredOwner = (process.env.REPO_FACTORY_OWNER || "").trim();
+            const defaultOwner = configuredOwner || authUser.login;
+            const results = [];
+
+            for (const file of files) {
+              const fullPath = path.join(requestsDir, file);
+              const raw = fs.readFileSync(fullPath, "utf8");
+              const request = JSON.parse(raw);
+
+              const name = String(request.name || "").trim();
+              if (!name) {
+                throw new Error(`Request ${file} is missing "name".`);
+              }
+              if (!safeNameRegex.test(name)) {
+                throw new Error(`Request ${file} has invalid repo name "${name}". Use lowercase letters, digits, dots, and dashes.`);
+              }
+              if (!allowedPrefixes.some((prefix) => name.startsWith(prefix))) {
+                throw new Error(`Request ${file} uses repo name "${name}" without an allowed prefix: ${allowedPrefixes.join(", ")}`);
+              }
+
+              const targetOwner = String(request.owner || defaultOwner).trim();
+              const visibility = request.visibility === "public" ? "public" : "private";
+              const createReadme = request.create_readme !== false;
+              const description = String(request.description || "");
+              const homepage = request.homepage ? String(request.homepage) : undefined;
+              const topics = Array.isArray(request.topics)
+                ? request.topics.map((t) => String(t).toLowerCase()).filter(Boolean)
+                : [];
+
+              let outcome = "exists";
+              let repoUrl = `https://github.com/${targetOwner}/${name}`;
+
+              try {
+                const existing = await github.rest.repos.get({ owner: targetOwner, repo: name });
+                repoUrl = existing.data.html_url || repoUrl;
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+
+                const payload = {
+                  name,
+                  description,
+                  private: visibility !== "public",
+                  auto_init: createReadme,
+                  homepage,
+                };
+
+                let created;
+                if (targetOwner === authUser.login) {
+                  created = await github.rest.repos.createForAuthenticatedUser(payload);
+                } else {
+                  created = await github.rest.repos.createInOrg({
+                    org: targetOwner,
+                    ...payload,
+                  });
+                }
+
+                repoUrl = created.data.html_url || repoUrl;
+                outcome = "created";
+
+                if (topics.length > 0) {
+                  await github.rest.repos.replaceAllTopics({
+                    owner: targetOwner,
+                    repo: name,
+                    names: topics,
+                  });
+                }
+              }
+
+              const processed = {
+                ...request,
+                status: "processed",
+                processed_at: new Date().toISOString(),
+                result: {
+                  owner: targetOwner,
+                  name,
+                  visibility,
+                  outcome,
+                  url: repoUrl,
+                },
+              };
+
+              const processedName = file.replace(/\.json$/, ".processed.json");
+              fs.writeFileSync(path.join(processedDir, processedName), `${JSON.stringify(processed, null, 2)}\n`);
+              fs.unlinkSync(fullPath);
+              results.push(processed.result);
+            }
+
+            if (results.length > 0) {
+              core.summary
+                .addHeading("Repo Factory Results")
+                .addTable([
+                  [{ data: "Owner", header: true }, { data: "Repo", header: true }, { data: "Outcome", header: true }, { data: "URL", header: true }],
+                  ...results.map((r) => [r.owner, r.name, r.outcome, r.url]),
+                ]);
+              await core.summary.write();
+            }
+
+      - name: Commit request ledger updates
+        run: |
+          if git diff --quiet; then
+            echo "No ledger updates to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/repo-factory/requests .github/repo-factory/processed
+          git commit -m "chore(repo-factory): record processed repo requests"
+          git push

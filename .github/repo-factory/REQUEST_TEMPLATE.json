@@ -1,0 +1,11 @@
+{
+  "name": "akn-example-project",
+  "description": "Short description of the project purpose",
+  "visibility": "private",
+  "owner": "eido740",
+  "create_readme": true,
+  "topics": [
+    "ai-assisted",
+    "starter"
+  ]
+}
