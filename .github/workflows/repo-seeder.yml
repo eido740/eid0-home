@@ -212,7 +212,7 @@ jobs:
               const owner = String(request.owner || defaultOwner).trim();
               const repo = String(request.repo || request.name || "").trim();
               const profile = String(request.profile || "").trim();
-              const branch = String(request.branch || "main").trim();
+              const requestedBranch = request.branch ? String(request.branch).trim() : "";
 
               if (!repo) {
                 throw new Error(`Request ${requestFile} is missing "repo" or "name".`);
@@ -228,18 +228,58 @@ jobs:
               }
 
               const repoInfo = await github.rest.repos.get({ owner, repo });
-              const targetBranch = branch || repoInfo.data.default_branch;
+              const defaultBranch = String(repoInfo.data.default_branch || "main").trim();
+              let targetBranch = requestedBranch || defaultBranch;
+
+              try {
+                await github.rest.repos.getBranch({
+                  owner,
+                  repo,
+                  branch: targetBranch,
+                });
+              } catch (error) {
+                if (error.status === 404 && requestedBranch && requestedBranch !== defaultBranch) {
+                  core.warning(
+                    `Requested branch "${requestedBranch}" not found for ${owner}/${repo}. Falling back to default branch "${defaultBranch}".`,
+                  );
+                  targetBranch = defaultBranch;
+                } else {
+                  throw error;
+                }
+              }
+
+              core.info(`Seeding ${owner}/${repo} on branch ${targetBranch} with profile ${profile}.`);
               const filesToSeed = seedFilesForProfile(profile, request);
 
               for (const entry of filesToSeed) {
-                await upsertFile(
-                  owner,
-                  repo,
-                  targetBranch,
-                  entry.path,
-                  entry.content,
-                  `chore(seed): apply ${profile}`,
-                );
+                try {
+                  await upsertFile(
+                    owner,
+                    repo,
+                    targetBranch,
+                    entry.path,
+                    entry.content,
+                    `chore(seed): apply ${profile}`,
+                  );
+                } catch (error) {
+                  if (error.status === 404 && entry.path.startsWith(".github/workflows/")) {
+                    throw new Error(
+                      [
+                        `Cannot write ${entry.path} in ${owner}/${repo}.`,
+                        "Likely cause: token lacks workflow-write permission for target repository.",
+                        "For classic PAT: include scopes 'repo' and 'workflow'.",
+                        "For fine-grained PAT: grant 'Contents: Read and write' and 'Workflows: Read and write' to target repo.",
+                        `Target branch attempted: ${targetBranch}.`,
+                      ].join(" "),
+                    );
+                  }
+                  if (error.status === 404) {
+                    throw new Error(
+                      `Received 404 while writing ${entry.path} to ${owner}/${repo}@${targetBranch}. Verify repo access and branch.`,
+                    );
+                  }
+                  throw error;
+                }
               }
 
               const processed = {
