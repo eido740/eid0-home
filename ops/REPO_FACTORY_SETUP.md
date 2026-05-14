@@ -6,6 +6,7 @@ This turns project repo creation into an automated pipeline.
 - You say: "Create project <name>".
 - Assistant stages project docs and a repo request file.
 - After merge to `main`, GitHub Action creates the repository automatically.
+- Optional follow-up: repo seeder can apply baseline files to new repos with the same auth model.
 
 ## One-time GitHub setup
 1. Create a fine-grained PAT from your GitHub account.
@@ -29,6 +30,9 @@ This turns project repo creation into an automated pipeline.
 
 ## Request file shape
 See `.github/repo-factory/REQUEST_TEMPLATE.json`.
+
+## Related automation
+- Repo seeder setup: `ops/REPO_SEEDER_SETUP.md`
 
 ## Security recommendations
 - Use a dedicated machine user token if you later scale this.

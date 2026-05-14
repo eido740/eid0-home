@@ -42,6 +42,7 @@
 ## Natural-Language Commands (No Script Invocation Required)
 - "Create project <name>" -> assistant scaffolds project files and updates portfolio index.
 - "Create repo <name>" -> assistant creates a repo-factory request so GitHub Actions can create the repository after merge.
+- "Seed repo <name> from bootstrap" -> assistant creates a repo-seeder request to apply approved bootstrap profile.
 - "Pause project <name>" -> assistant updates status/location and next re-entry step.
 - "Resume project <name>" -> assistant restores context from project docs and MEMEX.
 - "Ship status" -> assistant summarizes blockers, active projects, and next physical steps.

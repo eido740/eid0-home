@@ -50,3 +50,9 @@ Use a monorepo only when codebases are tightly coupled and versioned together (s
 - Requests: `.github/repo-factory/requests/*.json`
 - Processed ledger: `.github/repo-factory/processed/*.processed.json`
 - One-time setup: `ops/REPO_FACTORY_SETUP.md`
+
+## Repo Seeder (Bootstrap Mode)
+- Workflow: `.github/workflows/repo-seeder.yml`
+- Requests: `.github/repo-seeder/requests/*.json`
+- Processed ledger: `.github/repo-seeder/processed/*.processed.json`
+- Setup: `ops/REPO_SEEDER_SETUP.md`
