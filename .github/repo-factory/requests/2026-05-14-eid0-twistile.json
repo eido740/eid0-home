@@ -1,0 +1,14 @@
+{
+  "name": "eid0-twistile",
+  "description": "Twistile: web tool to turn images into Rubik's Cube mosaic plans; ship under eid0.com/mosaic",
+  "visibility": "private",
+  "owner": "eido740",
+  "create_readme": true,
+  "homepage": "https://eid0.com/mosaic",
+  "topics": [
+    "ai-assisted",
+    "rubiks-cube",
+    "mosaic",
+    "web"
+  ]
+}
