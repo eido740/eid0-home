@@ -1,10 +1,10 @@
 # MEMEX
 
 ## Session Snapshot
-- Session #: 11
+- Session #: 12
 - Date: 2026-05-14
 - Active repo/branch: `/workspace` / `cursor/universal-ai-workflow-0ca7`
-- Strategic objective: Resolve opaque repo-seeder 404 and make failure mode actionable.
+- Strategic objective: Establish permanent model-cost SOP and clarify cheap-mode vs big-brain workflow.
 
 ## Decisions Made
 - Cursor is the implementation engine; Gemini Live is strategy support.
@@ -38,12 +38,14 @@
 - Patched seeder to emit explicit guidance for workflow-permission failures (classic PAT `workflow` scope or fine-grained Workflows write permission).
 - Added branch resolution guard: fallback to target repo default branch if requested branch is missing.
 - Updated seeder docs and request templates to treat `branch` as optional and clarify required token permissions.
+- Added permanent cost-routing SOP (`ops/COST_GUARDRAILS.md`) with default cheap lane, escalation triggers, and daily spend guardrails.
+- Clarified model switching behavior: for Cloud Agent style sessions, use a new agent/session to move to cheaper lane when model is locked in current run.
 
 ## Current Technical Blockers
-- Seeder hotfix must be merged to `main`; token may still need workflow-write permission depending on current PAT scope.
+- Seeder rerun still depends on token having workflow-write permission in target repo.
 
 ## Next Physical Step
-- Merge seeder hotfix PR, then rerun `Repo Seeder` for queued request and validate `eid0-site` bootstrap files.
+- Update PAT permissions (`repo` + `workflow` for classic, or fine-grained equivalent), rerun `Repo Seeder`, then validate `eid0-site` files.
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).
@@ -55,6 +57,7 @@
 - Decide whether to auto-merge low-risk automation PRs once checks pass.
 - Decide whether to broaden or tighten allowed path rules in auto-merge lane after first week of use.
 - If seeder still fails, rotate token with workflow-write permission and rerun.
+- Choose concrete daily spend ceiling and hard stop threshold in Cursor dashboard settings.
 
 ## Session Log
 | Session # | Date | Focus | Friction Observed | Rule Update Proposed |
@@ -70,6 +73,7 @@
 | 9 | 2026-05-14 | Seeder workflow hotfix + PR friction reduction | Workflow parse failure and repeated draft->ready clicks slowed execution | Rewrite seeder string construction for YAML safety and default PRs to non-draft |
 | 10 | 2026-05-14 | Guarded auto-merge lane | Repeated manual merge clicks created operator friction | Add label-based auto-merge workflow with strict path and trust guardrails |
 | 11 | 2026-05-14 | Seeder 404 diagnostics + remediation | Opaque 404 blocked bootstrap with unclear root cause | Add explicit permission error messaging, branch fallback, and clearer token-scope docs |
+| 12 | 2026-05-14 | Cost guardrails + model routing SOP | Early-day usage burn risk and uncertainty about model switching path | Add permanent cheap/default lane SOP with explicit big-brain escalation and dashboard guardrails |
 
 ## Retro (Session 10)
 - Recurring friction point 1: Merge workflow still too manual.

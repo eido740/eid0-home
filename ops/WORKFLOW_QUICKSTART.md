@@ -26,3 +26,8 @@
 ## 5) Optional low-risk fast lane
 - For workflow/docs automation PRs in control tower, apply label `automerge-safe`.
 - Guardrails are defined in `ops/AUTO_MERGE_LANE.md`.
+
+## 6) Cost discipline lane
+- Default to low-cost model lane for routine work.
+- Escalate to high-cost lane only for hard tasks.
+- Use `ops/COST_GUARDRAILS.md` as the routing policy.

@@ -10,6 +10,7 @@ This repo now includes a durable workflow layer for organized, repeatable projec
 - `ops/REPO_FACTORY_SETUP.md` - one-time setup for automated GitHub repo creation.
 - `ops/REPO_SEEDER_SETUP.md` - setup for automated bootstrap seeding into execution repos.
 - `ops/AUTO_MERGE_LANE.md` - guarded one-label lane for low-risk auto-merging.
+- `ops/COST_GUARDRAILS.md` - default cheap-mode + explicit big-brain escalation policy.
 - `MEMEX.md` - mandatory session continuity log (decisions, blockers, next physical step).
 - `PROJECT_INDEX.md` - portfolio tracker for project status + repo location.
 - `ops/GEMINI_TO_CURSOR_HANDOFF.md` - mobile strategy to desktop execution handoff template.

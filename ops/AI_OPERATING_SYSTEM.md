@@ -40,6 +40,7 @@
 7. Deployment boundary: control-tower repo cannot be the production publisher; deploy secrets belong only in designated execution repos.
 8. PR friction control: default new PRs to ready-for-review (non-draft) unless explicitly requested otherwise.
 9. Auto-merge lane: low-risk control-tower PRs may use `automerge-safe` label to merge via guarded workflow checks.
+10. Cost guardrail: default to low-cost model lane for routine work; escalate to high-cost model only for justified hard tasks, then de-escalate.
 
 ## Natural-Language Commands (No Script Invocation Required)
 - "Create project <name>" -> assistant scaffolds project files and updates portfolio index.
@@ -48,6 +49,9 @@
 - "Pause project <name>" -> assistant updates status/location and next re-entry step.
 - "Resume project <name>" -> assistant restores context from project docs and MEMEX.
 - "Ship status" -> assistant summarizes blockers, active projects, and next physical steps.
+- "Cost status" -> assistant summarizes budget posture and recommends model lane.
+- "Big brain mode for this task" -> temporary escalation to high-cost reasoning lane.
+- "Back to cheap mode" -> immediate de-escalation to default lane.
 
 ## Session Protocol
 ### Start of session
