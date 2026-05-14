@@ -23,12 +23,13 @@
 - Created repo-factory request: `.github/repo-factory/requests/2026-05-14-eid0-site.json`.
 - Identified runtime failure in repo-factory workflow: `Identifier 'core' has already been declared`.
 - Patched workflow to use injected `core` from `actions/github-script` context (no local redeclaration).
+- Expanded repo-factory trigger paths to include workflow-file changes for automatic reruns after hotfix merges.
 
 ## Current Technical Blockers
 - Hotfix branch must be merged to `main` before rerunning repo-factory.
 
 ## Next Physical Step
-- Merge hotfix PR, then rerun `Repo Factory` workflow to process queued `eid0-site` request.
+- Merge hotfix PR #4; repo-factory should auto-run and process queued `eid0-site` request.
 
 ## Open Loops
 - Confirm preferred naming convention for project slugs (kebab-case is current default).

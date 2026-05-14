@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/repo-factory/requests/*.json"
+      - ".github/workflows/repo-factory.yml"
   workflow_dispatch:
 
 permissions:
