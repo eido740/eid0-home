@@ -1,0 +1,184 @@
+name: Auto Merge Lane
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: auto-merge-lane-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate and merge guarded PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request;
+            const labelName = "automerge-safe";
+
+            if (!pr) {
+              core.info("No pull_request payload. Exiting.");
+              return;
+            }
+
+            const hasLabel = (pr.labels || []).some((label) => label.name === labelName);
+            if (!hasLabel) {
+              core.info(`PR #${pr.number} does not have '${labelName}' label.`);
+              return;
+            }
+
+            if (pr.draft) {
+              core.info(`PR #${pr.number} is draft; skipping.`);
+              return;
+            }
+
+            if (!pr.base || pr.base.ref !== "main") {
+              core.info(`PR #${pr.number} does not target main; skipping.`);
+              return;
+            }
+
+            const expectedRepo = `${owner}/${repo}`.toLowerCase();
+            const headRepo = (pr.head?.repo?.full_name || "").toLowerCase();
+            if (headRepo !== expectedRepo) {
+              core.warning(`PR #${pr.number} head repo ${headRepo} is not ${expectedRepo}. Removing label.`);
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number: pr.number,
+                name: labelName,
+              });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: `Auto-merge lane rejected: PR head repository must be \`${expectedRepo}\`.`,
+              });
+              return;
+            }
+
+            const trustedAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
+            if (!trustedAssociations.has(pr.author_association || "")) {
+              core.warning(`PR #${pr.number} author association ${pr.author_association} is not trusted. Removing label.`);
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number: pr.number,
+                name: labelName,
+              });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: `Auto-merge lane rejected: author association \`${pr.author_association}\` is not in trusted set.`,
+              });
+              return;
+            }
+
+            const allowedPrefixes = [
+              ".github/workflows/",
+              ".github/repo-factory/",
+              ".github/repo-seeder/",
+              "ops/",
+            ];
+            const allowedExact = new Set([
+              "README.md",
+              "MEMEX.md",
+              "PROJECT_INDEX.md",
+            ]);
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const disallowed = files
+              .map((file) => file.filename)
+              .filter((filename) => {
+                if (allowedExact.has(filename)) {
+                  return false;
+                }
+                return !allowedPrefixes.some((prefix) => filename.startsWith(prefix));
+              });
+
+            if (disallowed.length > 0) {
+              core.warning(`PR #${pr.number} touches disallowed paths.`);
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number: pr.number,
+                name: labelName,
+              });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: [
+                  "Auto-merge lane rejected due to disallowed file paths:",
+                  ...disallowed.map((path) => `- \`${path}\``),
+                  "",
+                  "This lane is restricted to control-tower automation/docs paths only.",
+                ].join("\n"),
+              });
+              return;
+            }
+
+            const { data: latest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: pr.number,
+            });
+
+            try {
+              await github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number: pr.number,
+                merge_method: "squash",
+              });
+              core.info(`PR #${pr.number} merged immediately via auto-merge lane.`);
+              return;
+            } catch (error) {
+              core.warning(`Immediate merge failed for PR #${pr.number}: ${error.message}`);
+            }
+
+            try {
+              await github.graphql(
+                `mutation($pullRequestId: ID!) {
+                  enablePullRequestAutoMerge(
+                    input: { pullRequestId: $pullRequestId, mergeMethod: SQUASH }
+                  ) {
+                    pullRequest {
+                      number
+                    }
+                  }
+                }`,
+                { pullRequestId: latest.node_id },
+              );
+              core.info(`Enabled GitHub auto-merge for PR #${pr.number}.`);
+            } catch (error) {
+              core.warning(`Could not enable GitHub auto-merge for PR #${pr.number}: ${error.message}`);
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: "Auto-merge lane could not complete merge. Check branch protection or repository auto-merge settings.",
+              });
+            }

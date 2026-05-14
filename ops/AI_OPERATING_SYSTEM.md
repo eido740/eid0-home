@@ -38,6 +38,8 @@
 5. Session-close autopilot: assistant updates `MEMEX.md` at the end of each substantive work session.
 6. Hanging-session recovery: on next interaction after a dangling session, assistant first reconciles and closes the prior session in `MEMEX.md`, then starts new work.
 7. Deployment boundary: control-tower repo cannot be the production publisher; deploy secrets belong only in designated execution repos.
+8. PR friction control: default new PRs to ready-for-review (non-draft) unless explicitly requested otherwise.
+9. Auto-merge lane: low-risk control-tower PRs may use `automerge-safe` label to merge via guarded workflow checks.
 
 ## Natural-Language Commands (No Script Invocation Required)
 - "Create project <name>" -> assistant scaffolds project files and updates portfolio index.

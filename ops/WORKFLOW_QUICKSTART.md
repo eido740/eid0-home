@@ -22,3 +22,7 @@
 
 ## 4) Every 5th session
 - Run the friction retro and propose one concrete rule improvement.
+
+## 5) Optional low-risk fast lane
+- For workflow/docs automation PRs in control tower, apply label `automerge-safe`.
+- Guardrails are defined in `ops/AUTO_MERGE_LANE.md`.

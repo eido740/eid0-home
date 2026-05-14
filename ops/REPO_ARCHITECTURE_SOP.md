@@ -56,3 +56,9 @@ Use a monorepo only when codebases are tightly coupled and versioned together (s
 - Requests: `.github/repo-seeder/requests/*.json`
 - Processed ledger: `.github/repo-seeder/processed/*.processed.json`
 - Setup: `ops/REPO_SEEDER_SETUP.md`
+
+## Guarded Auto-Merge Lane
+- Workflow: `.github/workflows/auto-merge-lane.yml`
+- Trigger label: `automerge-safe`
+- Scope: low-risk control-tower automation/docs updates only
+- Rules: `ops/AUTO_MERGE_LANE.md`

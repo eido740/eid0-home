@@ -56,65 +56,69 @@ jobs:
 
             function bootstrapIndexHtml(title) {
               const safeTitle = title || "eid0";
-              return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${safeTitle}</title>
-  <style>
-    :root { --fg: #d6f5e3; --bg: #0a0f0d; --accent: #53d78b; }
-    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--fg); }
-    main { max-width: 900px; margin: 0 auto; padding: 3rem 1.25rem; }
-    h1 { margin-top: 0; color: var(--accent); }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
-    .card { border: 1px solid #1f2f28; border-radius: 8px; padding: 1rem; background: #101815; }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>${safeTitle} site platform</h1>
-    <p>Deployment pipeline is active from this repository.</p>
-    <div class="cards">
-      <div class="card">
-        <h2>Apps</h2>
-        <p>Host mini apps under <code>/public/apps/&lt;app-slug&gt;/</code>.</p>
-      </div>
-      <div class="card">
-        <h2>Shared Assets</h2>
-        <p>Shared static assets live in <code>/public/assets/</code>.</p>
-      </div>
-      <div class="card">
-        <h2>Deploy</h2>
-        <p>Push to <code>main</code> with <code>public/**</code> changes to publish.</p>
-      </div>
-    </div>
-  </main>
-</body>
-</html>
-`;
+              return [
+                "<!DOCTYPE html>",
+                "<html lang=\"en\">",
+                "<head>",
+                "  <meta charset=\"UTF-8\">",
+                "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+                `  <title>${safeTitle}</title>`,
+                "  <style>",
+                "    :root { --fg: #d6f5e3; --bg: #0a0f0d; --accent: #53d78b; }",
+                "    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--fg); }",
+                "    main { max-width: 900px; margin: 0 auto; padding: 3rem 1.25rem; }",
+                "    h1 { margin-top: 0; color: var(--accent); }",
+                "    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }",
+                "    .card { border: 1px solid #1f2f28; border-radius: 8px; padding: 1rem; background: #101815; }",
+                "    a { color: var(--accent); text-decoration: none; }",
+                "    a:hover { text-decoration: underline; }",
+                "  </style>",
+                "</head>",
+                "<body>",
+                "  <main>",
+                `    <h1>${safeTitle} site platform</h1>`,
+                "    <p>Deployment pipeline is active from this repository.</p>",
+                "    <div class=\"cards\">",
+                "      <div class=\"card\">",
+                "        <h2>Apps</h2>",
+                "        <p>Host mini apps under <code>/public/apps/&lt;app-slug&gt;/</code>.</p>",
+                "      </div>",
+                "      <div class=\"card\">",
+                "        <h2>Shared Assets</h2>",
+                "        <p>Shared static assets live in <code>/public/assets/</code>.</p>",
+                "      </div>",
+                "      <div class=\"card\">",
+                "        <h2>Deploy</h2>",
+                "        <p>Push to <code>main</code> with <code>public/**</code> changes to publish.</p>",
+                "      </div>",
+                "    </div>",
+                "  </main>",
+                "</body>",
+                "</html>",
+                "",
+              ].join("\\n");
             }
 
             function bootstrapReadme() {
-              return `# eid0-site
-
-Dedicated website platform repository for publishing \`eid0.com\`.
-
-## Purpose
-- own production deploy workflow for the site
-- host root shell and shared web assets
-- host mini apps under \`public/apps/\`
-
-## Deploy behavior
-- workflow: \`.github/workflows/deploy.yml\`
-- trigger: push to \`main\` when \`public/**\` changes
-- destination: DreamHost path \`/home/geminuser/eid0.com/\`
-
-## Bootstrap source
-This repository was seeded from control-tower bootstrap assets.
-`;
+              return [
+                "# eid0-site",
+                "",
+                "Dedicated website platform repository for publishing `eid0.com`.",
+                "",
+                "## Purpose",
+                "- own production deploy workflow for the site",
+                "- host root shell and shared web assets",
+                "- host mini apps under `public/apps/`",
+                "",
+                "## Deploy behavior",
+                "- workflow: `.github/workflows/deploy.yml`",
+                "- trigger: push to `main` when `public/**` changes",
+                "- destination: DreamHost path `/home/geminuser/eid0.com/`",
+                "",
+                "## Bootstrap source",
+                "This repository was seeded from control-tower bootstrap assets.",
+                "",
+              ].join("\\n");
             }
 
             function seedFilesForProfile(profile, request) {
